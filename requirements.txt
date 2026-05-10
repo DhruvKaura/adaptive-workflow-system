@@ -32,6 +32,7 @@ ollama
 
 slowapi
 
-black
+
 isort
 flake8
+black
