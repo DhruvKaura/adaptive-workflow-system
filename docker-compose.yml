@@ -33,7 +33,7 @@ services:
   worker:
     build: .
     container_name: aws_worker
-    command: celery -A app.core.celery.worker worker --loglevel=info
+    command: celery -A app.core.celery.celery_app.celery_app worker --loglevel=info
     volumes:
       - .:/app
     depends_on:
