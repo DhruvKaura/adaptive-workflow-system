@@ -32,7 +32,9 @@ app.add_middleware(SlowAPIMiddleware)
 # Trusted Hosts
 # -----------------------------
 
-app.add_middleware(TrustedHostMiddleware, allowed_hosts=["localhost", "127.0.0.1","test"])
+app.add_middleware(
+    TrustedHostMiddleware, allowed_hosts=["localhost", "127.0.0.1", "test"]
+)
 
 
 # -----------------------------
