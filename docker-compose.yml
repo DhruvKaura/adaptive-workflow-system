@@ -1,0 +1,40 @@
+version: '3.9'
+
+services:
+
+  api:
+    build: .
+    container_name: aws_api
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    depends_on:
+      - postgres
+      - redis
+
+  postgres:
+    image: postgres:16
+    container_name: aws_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: adaptive_workflow_db
+    ports:
+      - "5433:5432"
+
+  redis:
+    image: redis:7
+    container_name: aws_redis
+    ports:
+      - "6379:6379"
+
+  worker:
+    build: .
+    container_name: aws_worker
+    command: celery -A app.core.celery.worker worker --loglevel=info
+    volumes:
+      - .:/app
+    depends_on:
+      - redis
