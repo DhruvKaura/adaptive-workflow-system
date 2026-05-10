@@ -7,6 +7,7 @@ from app.core.database.base import Base
 
 
 class Project(Base):
+
     __tablename__ = "projects"
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
@@ -17,8 +18,10 @@ class Project(Base):
 
     workspace_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("workspaces.id"))
 
-    created_by: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"))
+    owner_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"))
 
     workspace = relationship("Workspace")
 
-    creator = relationship("User")
+    owner = relationship("User", back_populates="projects")
+
+    tasks = relationship("Task", back_populates="project")
