@@ -1,7 +1,10 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.security.security import (create_access_token, hash_password,
-                                        verify_password)
+from app.core.security.security import (
+    create_access_token,
+    hash_password,
+    verify_password,
+)
 from app.domains.auth.models import User
 from app.domains.auth.repository import AuthRepository
 from app.domains.auth.schemas import UserCreate
