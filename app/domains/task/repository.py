@@ -7,10 +7,7 @@ from app.domains.task.models import Task
 class TaskRepository:
 
     @staticmethod
-    async def create_task(
-        db: AsyncSession,
-        task: Task
-    ):
+    async def create_task(db: AsyncSession, task: Task):
 
         db.add(task)
 
@@ -21,24 +18,14 @@ class TaskRepository:
         return task
 
     @staticmethod
-    async def get_task_by_id(
-        db: AsyncSession,
-        task_id
-    ):
+    async def get_task_by_id(db: AsyncSession, task_id):
 
-        result = await db.execute(
-            select(Task).where(
-                Task.id == task_id
-            )
-        )
+        result = await db.execute(select(Task).where(Task.id == task_id))
 
         return result.scalar_one_or_none()
 
     @staticmethod
-    async def save(
-        db: AsyncSession,
-        task: Task
-    ):
+    async def save(db: AsyncSession, task: Task):
 
         await db.commit()
 

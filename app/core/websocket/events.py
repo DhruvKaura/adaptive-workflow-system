@@ -1,21 +1,12 @@
-from fastapi import (
-    APIRouter,
-    WebSocket,
-    WebSocketDisconnect
-)
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
-from app.core.websocket.manager import (
-    manager
-)
-
+from app.core.websocket.manager import manager
 
 router = APIRouter()
 
 
 @router.websocket("/ws/events")
-async def websocket_endpoint(
-    websocket: WebSocket
-):
+async def websocket_endpoint(websocket: WebSocket):
 
     await manager.connect(websocket)
 

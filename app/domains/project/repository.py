@@ -7,10 +7,7 @@ from app.domains.project.models import Project
 class ProjectRepository:
 
     @staticmethod
-    async def create_project(
-        db: AsyncSession,
-        project: Project
-    ):
+    async def create_project(db: AsyncSession, project: Project):
 
         db.add(project)
 
@@ -21,15 +18,8 @@ class ProjectRepository:
         return project
 
     @staticmethod
-    async def get_project_by_id(
-        db: AsyncSession,
-        project_id
-    ):
+    async def get_project_by_id(db: AsyncSession, project_id):
 
-        result = await db.execute(
-            select(Project).where(
-                Project.id == project_id
-            )
-        )
+        result = await db.execute(select(Project).where(Project.id == project_id))
 
         return result.scalar_one_or_none()

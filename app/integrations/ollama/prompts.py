@@ -1,7 +1,4 @@
-def build_workflow_summary_prompt(
-    risk_score,
-    reasons
-):
+def build_workflow_summary_prompt(risk_score, reasons):
 
     return f"""
     Analyze this workflow task.

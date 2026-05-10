@@ -4,39 +4,22 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domains.task.models import Task
+from app.domains.workflow.models import WorkflowEvent
+from app.integrations.ollama.client import OllamaClient
+from app.integrations.ollama.prompts import build_workflow_summary_prompt
 
-from app.domains.workflow.models import (
-    WorkflowEvent
-)
-
-from app.integrations.ollama.client import (
-    OllamaClient
-)
-
-from app.integrations.ollama.prompts import (
-    build_workflow_summary_prompt
-)
 
 class IntelligenceService:
 
     @staticmethod
-    async def predict_deadline_risk(
-        db: AsyncSession,
-        task_id
-    ):
+    async def predict_deadline_risk(db: AsyncSession, task_id):
 
-        result = await db.execute(
-            select(Task).where(
-                Task.id == task_id
-            )
-        )
+        result = await db.execute(select(Task).where(Task.id == task_id))
 
         task = result.scalar_one_or_none()
 
         if not task:
-            return {
-                "error": "Task not found"
-            }
+            return {"error": "Task not found"}
 
         risk_score = 0
 
@@ -44,23 +27,16 @@ class IntelligenceService:
 
         if task.due_date:
 
-            remaining_hours = (
-                task.due_date - datetime.utcnow()
-            ).total_seconds() / 3600
+            remaining_hours = (task.due_date - datetime.utcnow()).total_seconds() / 3600
 
             if remaining_hours < 24:
 
                 risk_score += 40
 
-                reasons.append(
-                    "Deadline approaching"
-                )
+                reasons.append("Deadline approaching")
 
         events_result = await db.execute(
-            select(WorkflowEvent)
-            .where(
-                WorkflowEvent.task_id == task_id
-            )
+            select(WorkflowEvent).where(WorkflowEvent.task_id == task_id)
         )
 
         events = events_result.scalars().all()
@@ -70,11 +46,8 @@ class IntelligenceService:
         for event in events:
 
             if (
-                event.event_type
-                == "STATUS_CHANGED"
-                and
-                event.new_value.get("status")
-                == "blocked"
+                event.event_type == "STATUS_CHANGED"
+                and event.new_value.get("status") == "blocked"
             ):
 
                 blocked_count += 1
@@ -83,9 +56,7 @@ class IntelligenceService:
 
             risk_score += 30
 
-            reasons.append(
-                "Task repeatedly blocked"
-            )
+            reasons.append("Task repeatedly blocked")
 
         transition_count = len(events)
 
@@ -93,9 +64,7 @@ class IntelligenceService:
 
             risk_score += 20
 
-            reasons.append(
-                "High workflow churn"
-            )
+            reasons.append("High workflow churn")
 
         risk_level = "low"
 
@@ -109,20 +78,14 @@ class IntelligenceService:
             "task_id": str(task.id),
             "risk_score": risk_score,
             "risk_level": risk_level,
-            "reasons": reasons
+            "reasons": reasons,
         }
 
     @staticmethod
-    async def generate_productivity_insights(
-        db: AsyncSession,
-        task_id
-    ):
+    async def generate_productivity_insights(db: AsyncSession, task_id):
 
         events_result = await db.execute(
-            select(WorkflowEvent)
-            .where(
-                WorkflowEvent.task_id == task_id
-            )
+            select(WorkflowEvent).where(WorkflowEvent.task_id == task_id)
         )
 
         events = events_result.scalars().all()
@@ -133,21 +96,11 @@ class IntelligenceService:
 
         for event in events:
 
-            if (
-                event.new_value
-                and
-                event.new_value.get("status")
-                == "blocked"
-            ):
+            if event.new_value and event.new_value.get("status") == "blocked":
 
                 blocked_count += 1
 
-            if (
-                event.new_value
-                and
-                event.new_value.get("status")
-                == "review"
-            ):
+            if event.new_value and event.new_value.get("status") == "review":
 
                 review_count += 1
 
@@ -155,23 +108,14 @@ class IntelligenceService:
 
         if blocked_count >= 2:
 
-            insights.append(
-                "Task experiences frequent blockers"
-            )
+            insights.append("Task experiences frequent blockers")
 
         if review_count >= 3:
 
-            insights.append(
-                "Task repeatedly returns to review"
-            )
+            insights.append("Task repeatedly returns to review")
 
         if not insights:
 
-            insights.append(
-                "Workflow appears healthy"
-            )
+            insights.append("Workflow appears healthy")
 
-        return {
-            "task_id": str(task_id),
-            "insights": insights
-        }
+        return {"task_id": str(task_id), "insights": insights}
